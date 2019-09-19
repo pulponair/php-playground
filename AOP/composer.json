@@ -1,0 +1,10 @@
+{
+    "require": {
+        "goaop/framework": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pulponair\\PhpPlayground\\AOP\\": "src/Classes/"
+        }
+    }
+}

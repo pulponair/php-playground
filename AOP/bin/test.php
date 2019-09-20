@@ -20,5 +20,5 @@ $applicationAspectKernel->init([
 $person = new Person();
 $person->setGender(Person::GENDER_MALE)
     ->setFirstName('Nikolas')
-    ->setFirstName('Hagelstein');
+    ->setLastName('Hagelstein');
 

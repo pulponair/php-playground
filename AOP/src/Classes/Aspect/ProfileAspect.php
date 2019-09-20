@@ -26,15 +26,15 @@ class ProfileAspect implements Aspect
      */
     protected function aroundMethodExecution(MethodInvocation $invocation)
     {
-        $start = microtime(true);
+        $time = microtime(true);
         $result = $invocation->proceed();
         echo 'Calling: ',
         $invocation,
         ' with arguments: ',
         json_encode($invocation->getArguments()),
         ' took: ',
-        (microtime(true) - $start) ,
-        ' s',
+        sprintf("%0.3f", (microtime(true) - $time) * 1e3),
+        ' ms',
         "\n";
         return $result;
     }

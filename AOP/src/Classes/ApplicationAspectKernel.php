@@ -11,5 +11,6 @@ class ApplicationAspectKernel extends AspectKernel
         $container->registerAspect(new Aspect\MonitorAspect());
         $container->registerAspect(new Aspect\FluentInterfaceAspect());
         $container->registerAspect(new Aspect\ProfileAspect());
+        $container->registerAspect(new Aspect\CacheAspect());
     }
 }

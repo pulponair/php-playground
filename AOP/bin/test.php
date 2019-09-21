@@ -2,6 +2,7 @@
 
 use Pulponair\PhpPlayground\AOP\ApplicationAspectKernel;
 use Pulponair\PhpPlayground\AOP\Person;
+use Pulponair\PhpPlayground\AOP\Math;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -22,3 +23,13 @@ $person->setGender(Person::GENDER_MALE)
     ->setFirstName('Nikolas')
     ->setLastName('Hagelstein');
 
+
+echo Math::sin(45) ."\n";
+echo Math::sin(90) ."\n";
+echo Math::sin(180) ."\n";
+echo Math::sin(240) ."\n";
+
+echo Math::sin(45) ."\n";
+echo Math::sin(90) ."\n";
+echo Math::sin(180) ."\n";
+echo Math::sin(240) ."\n";

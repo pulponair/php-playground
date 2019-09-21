@@ -19,7 +19,7 @@ class ProfileAspect implements Aspect
     /**
      * Fluent interface advice
      *
-     * @Around("execution(public Pulponair\PhpPlayground\AOP\*->*(*))")
+     * @Around("execution(public Pulponair\PhpPlayground\AOP\*::sin(*))")
      *
      * @param MethodInvocation $invocation
      * @return mixed|null|object

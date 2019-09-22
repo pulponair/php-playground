@@ -2,8 +2,6 @@
 
 Namespace Pulponair\PhpPlayground\AOP;
 
-
-
 use Pulponair\PhpPlayground\AOP\Annotation\Cacheable;
 
 class Math

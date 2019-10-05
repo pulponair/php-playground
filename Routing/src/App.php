@@ -2,7 +2,9 @@
 
 namespace Pulponair\PhpPlayground\Routing;
 
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestInterface;
+use Slim\Http\Factory\DecoratedResponseFactory;
 
 class App
 {
@@ -44,16 +46,21 @@ class App
      * @param RequestInterface $request
      * @throws \Exception
      */
-    public function run(RequestInterface $request)
+    public function run(RequestInterface $request): void
     {
         $this->request = $request;
         if (false === $callback = $this->getCallback()) {
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
 
-        $psr17Factory = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $responseBody = $psr17Factory->createStream(call_user_func($callback));
-        $response = $psr17Factory->createResponse(200)->withBody($responseBody);
+
+        //@todo move to contructor or function arguments
+        $psr17Factory = new Psr17Factory();
+        $decoratedResponseFactory = new DecoratedResponseFactory($psr17Factory, $psr17Factory);
+
+        $response = $decoratedResponseFactory->createResponse(200)->withBody($psr17Factory->createStream(
+            call_user_func($callback)
+        ));
 
         (new \Zend\HttpHandlerRunner\Emitter\SapiEmitter())->emit($response);
     }

@@ -6,7 +6,7 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestInterface;
 use Slim\Http\Factory\DecoratedResponseFactory;
 
-class App
+class Router
 {
     /**
      * @var array
@@ -25,9 +25,9 @@ class App
      * @param string $method
      * @param callable $callback
      */
-    public function addRoute(string $path, string $method, callable $callback): void
+    public function addRoute(string $method, string $path, callable $callback): void
     {
-        $this->routes[$path][$method] = $callback;
+        $this->routes[$method][$path] = $callback;
     }
 
     /**
@@ -35,8 +35,8 @@ class App
      */
     protected function getCallback()
     {
-        return isset($this->routes[$this->request->getUri()->getPath()][$this->request->getMethod()]) ?
-            $this->routes[$this->request->getUri()->getPath()][$this->request->getMethod()] :
+        return isset($this->routes[$this->request->getMethod()][$this->request->getUri()->getPath()]) ?
+            $this->routes[$this->request->getMethod()][$this->request->getUri()->getPath()] :
             false;
     }
 
@@ -52,7 +52,6 @@ class App
         if (false === $callback = $this->getCallback()) {
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
-
 
         //@todo move to contructor or function arguments
         $psr17Factory = new Psr17Factory();

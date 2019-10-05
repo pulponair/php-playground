@@ -13,9 +13,9 @@ $creator = new \Nyholm\Psr7Server\ServerRequestCreator(
 
 $serverRequest = $creator->fromGlobals();
 
-$app = new \Pulponair\PhpPlayground\Routing\App();
-$app->addRoute('/', 'GET', function() {
+$router = new \Pulponair\PhpPlayground\Routing\Router();
+$router->addRoute('GET', '/', function() {
     return 'hello world';
 });
 
-$app->run($serverRequest);
+$router->run($serverRequest);

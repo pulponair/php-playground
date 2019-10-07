@@ -116,13 +116,13 @@ class Router
         if (false === $this->getCallbackAndArguments($callback, $arguments)) {
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
-        $response = $this->responseFactory->createResponse(200);
+        $response = $this->responseFactory->createResponse();
 
-        $arguments[] = $request;
-        $arguments[] = $response;
-
+        $arguments[] = &$request;
+        $arguments[] = &$response;
+        $body = $this->streamFactory->createStream(call_user_func_array($callback, $arguments));
         $response = $response->withBody(
-            $this->streamFactory->createStream(call_user_func($callback, ...$arguments))
+            $body
         );
 
         $this->emitter->emit($response);

@@ -55,12 +55,73 @@ class Router
      *
      * @param string $path
      * @param string $method
-     * @param mixed $handler
+     * @param string|callable $handler
      */
     public function map(string $method, string $path, $handler): void
     {
         $this->routes[$method][$path] = $handler;
     }
+
+    /**
+     * Add a GET route
+     *
+     * @param string $path
+     * @param string|callable $handler
+     */
+    public function get(string $path, $handler): void {
+        $this->map('GET', $path, $handler);
+    }
+
+    /**
+     * Add a POST route
+     *
+     * @param string $path
+     * @param string|callable $handler
+     */
+    public function post(string $path, $handler): void {
+        $this->map('POST', $path, $handler);
+    }
+
+    /**
+     * Add a PUT route
+     *
+     * @param string $path
+     * @param string|callable $handler
+     */
+    public function put(string $path, $handler): void {
+        $this->map('PUT', $path, $handler);
+    }
+
+    /**
+     * Add a PATCH route
+     *
+     * @param string $path
+     * @param string|callable $handler
+     */
+    public function patch(string $path, $handler): void {
+        $this->map('PATCH', $path, $handler);
+    }
+
+    /**
+     * Add a DELETE route
+     *
+     * @param string $path
+     * @param string|callable $handler
+     */
+    public function delete(string $path, $handler): void {
+        $this->map('DELETE', $path, $handler);
+    }
+
+    /**
+     * Add a HEAD route
+     *
+     * @param string $path
+     * @param string|callable $handler
+     */
+    public function head(string $path, $handler): void {
+        $this->map('HEAD', $path, $handler);
+    }
+
 
     /**
      * Resolve callable

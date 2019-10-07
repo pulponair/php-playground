@@ -30,21 +30,21 @@ final class Bootstrap
         $router = new \Pulponair\PhpPlayground\Routing\Router($psr17Factory, $psr17Factory,
             new Zend\HttpHandlerRunner\Emitter\SapiEmitter());
 
-        $router->map('GET', '/', function ($request, &$response) {
+        $router->get('/', function ($request, &$response) {
             $response = $response->withStatus(201, 'All goood');
             return '<pre>' . var_export(func_get_args(), true);
         });
 
-        $router->map('GET', '/(\d+)', function ($a) {
+        $router->get('/(\d+)', function ($a) {
             return '<pre>' . var_export(func_get_args(), true);
         });
 
-        $router->map('GET', '/(\d+)/(\d+)', function ($a, $b) {
+        $router->get('/(\d+)/(\d+)', function ($a, $b) {
             return '<pre>' . var_export(func_get_args(), true);
         });
 
-        $router->map('GET', '/test', ['TestController', 'indexAction']);
-        $router->map('GET', '/test2', 'TestController::staticIndexAction');
+        $router->get('/test', ['TestController', 'indexAction']);
+        $router->get('/test2', 'TestController::staticIndexAction');
 
         $router->run($serverRequest);
     }

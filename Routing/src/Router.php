@@ -45,7 +45,7 @@ class Router
                                 StreamFactoryInterface $streamFactory,
                                 EmitterInterface $emitter)
     {
-        $this->responseFactory = $streamFactory;
+        $this->responseFactory = $responseFactory;
         $this->streamFactory = $streamFactory;
         $this->emitter = $emitter;
     }
@@ -103,26 +103,28 @@ class Router
      */
     public function run(RequestInterface $request): void
     {
-
         if (empty($this->routes)) {
             throw new \Exception('No Routes defined');
         }
 
         $this->request = $request;
         $arguments = [];
+
+        //Is this really the way to make type hinting work?
         $callback = function () {
         };
 
         if (false === $this->getCallbackAndArguments($callback, $arguments)) {
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
+
         $response = $this->responseFactory->createResponse();
 
         $arguments[] = &$request;
         $arguments[] = &$response;
-        $body = $this->streamFactory->createStream(call_user_func_array($callback, $arguments));
+
         $response = $response->withBody(
-            $body
+            $this->streamFactory->createStream(call_user_func_array($callback, $arguments))
         );
 
         $this->emitter->emit($response);

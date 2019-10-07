@@ -2,7 +2,6 @@
 
 namespace Pulponair\PhpPlayground\Routing;
 
-use http\Exception\InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -85,7 +84,7 @@ class Router
     }
 
     /**
-     * Get callback and arguments
+     * Resolve callback and arguments
      *
      * @param string|callable $handler
      * @param array $arguments

@@ -9,8 +9,6 @@ use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 class Router
 {
-    public const VARIABLE_REGEX = "\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*(?::\s*([^{}]*(?:\{(?-1)\}[^{}]*)*))?";
-
     /**
      * @var StreamFactoryInterface
      */
@@ -36,6 +34,13 @@ class Router
      */
     protected $request;
 
+    /**
+     * Router constructor.
+     *
+     * @param ResponseFactoryInterface $responseFactory
+     * @param StreamFactoryInterface $streamFactory
+     * @param EmitterInterface $emitter
+     */
     public function __construct(ResponseFactoryInterface $responseFactory,
                                 StreamFactoryInterface $streamFactory,
                                 EmitterInterface $emitter)
@@ -57,14 +62,37 @@ class Router
         $this->routes[$method][$path] = $callback;
     }
 
+
     /**
+     * Get callback and arguments
+     *
+     * @param callable $callback
+     * @param array $arguments
      * @return bool
      */
-    protected function getCallback()
+    protected function getCallbackAndArguments(callable &$callback, array &$arguments): bool
     {
-        return isset($this->routes[$this->request->getMethod()][$this->request->getUri()->getPath()]) ?
-            $this->routes[$this->request->getMethod()][$this->request->getUri()->getPath()] :
-            false;
+        if (!isset($this->routes[$this->request->getMethod()])) {
+            return false;
+        }
+
+        $bingo = false;
+        $paths = array_keys($this->routes[$this->request->getMethod()]);
+
+        foreach ($paths as $path) {
+            if ($bingo = (bool)preg_match('/^' . str_replace('/', '\/', $path) . '$/',
+                $this->request->getUri()->getPath(), $matches)) {
+                break;
+            }
+        }
+
+        if ($bingo === true) {
+            $callback = $this->routes[$this->request->getMethod()][$path];
+            array_shift($matches);
+            $arguments = $matches;
+        }
+
+        return $bingo;
     }
 
     /**
@@ -75,15 +103,28 @@ class Router
      */
     public function run(RequestInterface $request): void
     {
-        $this->request = $request;
-        if (false === $callback = $this->getCallback()) {
-            throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
+
+        if (empty($this->routes)) {
+            throw new \Exception('No Routes defined');
         }
 
-        $response = $this->responseFactory->createResponse(200)->withBody(
-            $this->streamFactory->createStream(call_user_func($callback))
-        );
+        $this->request = $request;
+        $arguments = [];
+        $callback = function () {
+        };
 
+        if (false === $this->getCallbackAndArguments($callback, $arguments)) {
+            throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
+        }
+        $response = $this->responseFactory->createResponse(200);
+
+        $arguments[] = $request;
+        $arguments[] = $response;
+
+        $response = $response->withBody(
+            $this->streamFactory->createStream(call_user_func($callback, ...$arguments))
+        );
+re
         $this->emitter->emit($response);
     }
 }

@@ -2,11 +2,9 @@
 
 namespace Pulponair\PhpPlayground\Routing;
 
-use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Slim\Http\Factory\DecoratedResponseFactory;
 use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 class Router

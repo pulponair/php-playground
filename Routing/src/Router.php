@@ -2,6 +2,7 @@
 
 namespace Pulponair\PhpPlayground\Routing;
 
+use http\Exception\InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -55,22 +56,41 @@ class Router
      *
      * @param string $path
      * @param string $method
-     * @param callable $callback
+     * @param mixed $hanlder
      */
-    public function addRoute(string $method, string $path, callable $callback): void
+    public function addRoute(string $method, string $path, $hanlder): void
     {
-        $this->routes[$method][$path] = $callback;
+        $this->routes[$method][$path] = $hanlder;
     }
 
+    /**
+     * Resolve callable
+     *
+     * @param string|callable $handler
+     * @return callable
+     */
+    protected function resolveCallable($handler): callable {
+        if (is_array($handler) && is_string($handler[0]) && is_string($handler[1])) {
+            $callback = [new $handler[0], $handler[1]];
+        } else {
+            $callback = $handler;
+        }
+
+        if (!is_callable($callback)) {
+            throw new \InvalidArgumentException('Could not resolve a callable for this route');
+        }
+
+        return $callback;
+    }
 
     /**
      * Get callback and arguments
      *
-     * @param callable $callback
+     * @param string|callable $handler
      * @param array $arguments
      * @return bool
      */
-    protected function getCallbackAndArguments(callable &$callback, array &$arguments): bool
+    protected function getHandlerAndArguments(&$handler, array &$arguments): bool
     {
         if (!isset($this->routes[$this->request->getMethod()])) {
             return false;
@@ -87,7 +107,8 @@ class Router
         }
 
         if ($bingo === true) {
-            $callback = $this->routes[$this->request->getMethod()][$path];
+            $handler  = $this->routes[$this->request->getMethod()][$path];
+
             array_shift($matches);
             $arguments = $matches;
         }
@@ -110,13 +131,11 @@ class Router
         $this->request = $request;
         $arguments = [];
 
-        //Is this really the way to make type hinting work?
-        $callback = function () {
-        };
-
-        if (false === $this->getCallbackAndArguments($callback, $arguments)) {
+        if (false === $this->getHandlerAndArguments($handler, $arguments)) {
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
+
+        $callback = $this->resolveCallable($handler);
 
         $response = $this->responseFactory->createResponse();
 

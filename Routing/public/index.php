@@ -3,6 +3,16 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 
+class TestController {
+    public function indexAction() {
+        return 'indexAction';
+    }
+
+    public static function staticindexAction() {
+        return 'staticIndexAction';
+    }
+}
+
 final class Bootstrap
 {
 
@@ -32,6 +42,11 @@ final class Bootstrap
         $router->addRoute('GET', '/(\d+)/(\d+)', function ($a, $b) {
             return '<pre>' . var_export(func_get_args(), true);
         });
+
+        $router->addRoute('GET', '/test', ['TestController', 'indexAction']);
+        $router->addRoute('GET', '/test2', 'TestController::staticIndexAction');
+
+
 
         $router->run($serverRequest);
     }

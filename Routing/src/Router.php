@@ -68,6 +68,7 @@ class Router
      *
      * @param string|callable $handler
      * @return callable
+     * @throws \InvalidArgumentException
      */
     protected function resolveCallable($handler): callable {
         if (is_array($handler) && is_string($handler[0]) && is_string($handler[1])) {
@@ -90,7 +91,7 @@ class Router
      * @param array $arguments
      * @return bool
      */
-    protected function getHandlerAndArguments(&$handler, array &$arguments): bool
+    protected function resolveHandlerAndArguments(&$handler, array &$arguments): bool
     {
         if (!isset($this->routes[$this->request->getMethod()])) {
             return false;
@@ -131,7 +132,7 @@ class Router
         $this->request = $request;
         $arguments = [];
 
-        if (false === $this->getHandlerAndArguments($handler, $arguments)) {
+        if (false === $this->resolveHandlerAndArguments($handler, $arguments)) {
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
 

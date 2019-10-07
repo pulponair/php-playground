@@ -21,9 +21,7 @@ final class Bootstrap
             new Zend\HttpHandlerRunner\Emitter\SapiEmitter());
 
         $router->addRoute('GET', '/', function ($request, &$response) {
-
             $response = $response->withStatus(201, 'All goood');
-
             return '<pre>' . var_export(func_get_args(), true);
         });
 
@@ -32,14 +30,11 @@ final class Bootstrap
         });
 
         $router->addRoute('GET', '/(\d+)/(\d+)', function ($a, $b) {
-            return '<pre>' .  var_export(func_get_args(), true);
+            return '<pre>' . var_export(func_get_args(), true);
         });
 
         $router->run($serverRequest);
     }
 }
-
-;
-
 
 Bootstrap::start();

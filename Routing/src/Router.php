@@ -4,10 +4,30 @@ namespace Pulponair\PhpPlayground\Routing;
 
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Slim\Http\Factory\DecoratedResponseFactory;
+use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 class Router
 {
+    public const VARIABLE_REGEX = "\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*(?::\s*([^{}]*(?:\{(?-1)\}[^{}]*)*))?";
+
+    /**
+     * @var StreamFactoryInterface
+     */
+    protected $responseFactory;
+
+    /**
+     * @var StreamFactoryInterface
+     */
+    protected $streamFactory;
+
+    /**
+     * @var EmitterInterface
+     */
+    protected $emitter;
+
     /**
      * @var array
      */
@@ -17,6 +37,15 @@ class Router
      * @var RequestInterface
      */
     protected $request;
+
+    public function __construct(ResponseFactoryInterface $responseFactory,
+                                StreamFactoryInterface $streamFactory,
+                                EmitterInterface $emitter)
+    {
+        $this->responseFactory = $streamFactory;
+        $this->streamFactory = $streamFactory;
+        $this->emitter = $emitter;
+    }
 
     /**
      * Add a route
@@ -53,14 +82,10 @@ class Router
             throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
         }
 
-        //@todo move to contructor or function arguments
-        $psr17Factory = new Psr17Factory();
-        $decoratedResponseFactory = new DecoratedResponseFactory($psr17Factory, $psr17Factory);
+        $response = $this->responseFactory->createResponse(200)->withBody(
+            $this->streamFactory->createStream(call_user_func($callback))
+        );
 
-        $response = $decoratedResponseFactory->createResponse(200)->withBody($psr17Factory->createStream(
-            call_user_func($callback)
-        ));
-
-        (new \Zend\HttpHandlerRunner\Emitter\SapiEmitter())->emit($response);
+        $this->emitter->emit($response);
     }
 }

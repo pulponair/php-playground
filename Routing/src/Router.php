@@ -124,7 +124,7 @@ class Router
         $response = $response->withBody(
             $this->streamFactory->createStream(call_user_func($callback, ...$arguments))
         );
-re
+
         $this->emitter->emit($response);
     }
 }

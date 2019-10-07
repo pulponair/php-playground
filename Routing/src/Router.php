@@ -55,11 +55,11 @@ class Router
      *
      * @param string $path
      * @param string $method
-     * @param mixed $hanlder
+     * @param mixed $handler
      */
-    public function addRoute(string $method, string $path, $hanlder): void
+    public function map(string $method, string $path, $handler): void
     {
-        $this->routes[$method][$path] = $hanlder;
+        $this->routes[$method][$path] = $handler;
     }
 
     /**

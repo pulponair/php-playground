@@ -10,7 +10,7 @@ use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 class Router
 {
     /**
-     * @var StreamFactoryInterface
+     * @var ResponseFactoryInterface
      */
     protected $responseFactory;
 
@@ -183,7 +183,7 @@ class Router
      * @param RequestInterface $request
      * @throws \Exception
      */
-    public function run(RequestInterface $request): void
+    public function dispatch(RequestInterface $request): void
     {
         if (empty($this->routes)) {
             throw new \Exception('No Routes defined');

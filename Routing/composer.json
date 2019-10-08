@@ -9,5 +9,8 @@
 		"psr-4": {
 			"Pulponair\\PhpPlayground\\Routing\\": "src/"
 		}
-	}
+	},
+    "require-dev": {
+        "phpstan/phpstan": "^0.11.16"
+    }
 }

@@ -23,7 +23,7 @@ final class Bootstrap
         $serverRequest = (new \Nyholm\Psr7Server\ServerRequestCreator(
             $psr17Factory, // ServerRequestFactory
             $psr17Factory, // UriFactory
-            $psr17Factory, // UploadedFileFactory
+            $psr17Factory, // UploadedFileFactoryls -l
             $psr17Factory  // StreamFactory
         ))->fromGlobals();
 
@@ -46,7 +46,7 @@ final class Bootstrap
         $router->get('/test', ['TestController', 'indexAction']);
         $router->get('/test2', 'TestController::staticIndexAction');
 
-        $router->run($serverRequest);
+        $router->dispatch($serverRequest);
     }
 }
 

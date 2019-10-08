@@ -9,6 +9,10 @@ use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 class Router
 {
+    public const NOT_FOUND = 0;
+    public const FOUND = 1;
+    public const METHOD_NOT_ALLOWED = 2;
+
     /**
      * @var ResponseFactoryInterface
      */
@@ -28,11 +32,6 @@ class Router
      * @var array
      */
     protected $routes = [];
-
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
 
     /**
      * Router constructor.
@@ -68,7 +67,8 @@ class Router
      * @param string $path
      * @param string|callable $handler
      */
-    public function get(string $path, $handler): void {
+    public function get(string $path, $handler): void
+    {
         $this->map('GET', $path, $handler);
     }
 
@@ -78,7 +78,8 @@ class Router
      * @param string $path
      * @param string|callable $handler
      */
-    public function post(string $path, $handler): void {
+    public function post(string $path, $handler): void
+    {
         $this->map('POST', $path, $handler);
     }
 
@@ -88,7 +89,8 @@ class Router
      * @param string $path
      * @param string|callable $handler
      */
-    public function put(string $path, $handler): void {
+    public function put(string $path, $handler): void
+    {
         $this->map('PUT', $path, $handler);
     }
 
@@ -98,7 +100,8 @@ class Router
      * @param string $path
      * @param string|callable $handler
      */
-    public function patch(string $path, $handler): void {
+    public function patch(string $path, $handler): void
+    {
         $this->map('PATCH', $path, $handler);
     }
 
@@ -108,7 +111,8 @@ class Router
      * @param string $path
      * @param string|callable $handler
      */
-    public function delete(string $path, $handler): void {
+    public function delete(string $path, $handler): void
+    {
         $this->map('DELETE', $path, $handler);
     }
 
@@ -118,7 +122,8 @@ class Router
      * @param string $path
      * @param string|callable $handler
      */
-    public function head(string $path, $handler): void {
+    public function head(string $path, $handler): void
+    {
         $this->map('HEAD', $path, $handler);
     }
 
@@ -128,17 +133,13 @@ class Router
      *
      * @param string|callable $handler
      * @return callable
-     * @throws \InvalidArgumentException
      */
-    protected function resolveCallable($handler): callable {
+    protected function resolveCallable($handler): callable
+    {
         if (is_array($handler) && is_string($handler[0]) && is_string($handler[1])) {
             $callback = [new $handler[0], $handler[1]];
         } else {
             $callback = $handler;
-        }
-
-        if (!is_callable($callback)) {
-            throw new \InvalidArgumentException('Could not resolve a callable for this route');
         }
 
         return $callback;
@@ -147,38 +148,37 @@ class Router
     /**
      * Resolve callback and arguments
      *
-     * @param string|callable $handler
-     * @param array $arguments
-     * @return bool
+     * @param RequestInterface $request
+     * @return array
      */
-    protected function resolveHandlerAndArguments(&$handler, array &$arguments): bool
+    protected function resolveRoute(RequestInterface $request): array
     {
-        if (!isset($this->routes[$this->request->getMethod()])) {
-            return false;
+        if (!isset($this->routes[$request->getMethod()])) {
+            return [self::METHOD_NOT_ALLOWED];
         }
 
-        $bingo = false;
-        $paths = array_keys($this->routes[$this->request->getMethod()]);
+        $routesByMethod = $this->routes[$request->getMethod()];
 
-        foreach ($paths as $path) {
-            if ($bingo = (bool)preg_match('/^' . str_replace('/', '\/', $path) . '$/',
-                $this->request->getUri()->getPath(), $matches)) {
+        $routeFound = false;
+        foreach ($routesByMethod as $path => $handler) {
+            if ($routeFound = (bool)preg_match('/^' . str_replace('/', '\/', $path) . '$/',
+                $request->getUri()->getPath(), $matches)) {
                 break;
             }
         }
 
-        if ($bingo === true) {
-            $handler  = $this->routes[$this->request->getMethod()][$path];
-
-            array_shift($matches);
-            $arguments = $matches;
+        if ($routeFound === true) {
+            $arguments = array_slice($matches, 1);
+            $result = [self::FOUND, $handler, $arguments];
+        } else {
+            $result = [self::NOT_FOUND];
         }
 
-        return $bingo;
+        return $result;
     }
 
     /**
-     * Run
+     * Dispatch
      *
      * @param RequestInterface $request
      * @throws \Exception
@@ -189,14 +189,20 @@ class Router
             throw new \Exception('No Routes defined');
         }
 
-        $this->request = $request;
-        $arguments = [];
-
-        if (false === $this->resolveHandlerAndArguments($handler, $arguments)) {
-            throw new \Exception('Route not defined for "' . $request->getUri()->getPath() . '"');
+        $routeInfo = $this->resolveRoute($request);
+        switch ($routeInfo[0]) {
+            case self::METHOD_NOT_ALLOWED:
+                throw new \Exception('Method not allowed');
+            case self::NOT_FOUND:
+                throw new \Exception('Not found');
         }
 
+        list(, $handler, $arguments) = $routeInfo;
+
         $callback = $this->resolveCallable($handler);
+        if (!is_callable($callback)) {
+            throw new \InvalidArgumentException('Could not resolve a callable for this route');
+        }
 
         $response = $this->responseFactory->createResponse();
 

@@ -1,7 +1,7 @@
 APIVersion: v1.11.0
-name: php-playground
+name: php-playground-aop
 type: php
-docroot: "Routing/public"
+docroot: ""
 php_version: "7.2"
 webserver_type: nginx-fpm
 router_http_port: "80"

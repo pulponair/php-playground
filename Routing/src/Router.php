@@ -13,6 +13,8 @@ class Router
     public const FOUND = 1;
     public const METHOD_NOT_ALLOWED = 2;
 
+    private const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'];
+
     /**
      * @var ResponseFactoryInterface
      */
@@ -50,6 +52,18 @@ class Router
     }
 
     /**
+     * Checks if given http method is valid
+     *
+     * @param string $method
+     * @return bool
+     */
+    protected function isValidHttpMethod(string $method): bool
+    {
+        return in_array($method, self::HTTP_METHODS);
+    }
+
+
+    /**
      * Add a route
      *
      * @param string $path
@@ -58,6 +72,17 @@ class Router
      */
     public function map(string $method, string $path, $handler): void
     {
+        $method = strtoupper($method);
+        $path = trim($path);
+
+        if (!$this->isValidHttpMethod($method)) {
+            throw new \InvalidArgumentException('Method "' . $method .'" is not valid');
+        }
+
+        if ($path === '') {
+            throw new \InvalidArgumentException('Path is empty string');
+        }
+
         $this->routes[$method][$path] = $handler;
     }
 
